@@ -48,6 +48,45 @@ async function run() {
 const userCollection = client.db('taskBite').collection('users')
 const taskCollection = client.db('taskBite').collection('task')
 
+
+
+// verify
+
+
+// verify admin
+
+const verifyAdmin = async (req, res, next) => {
+
+    const user = req.decoded
+    const query = { email: user?.email }
+    const result = await userCollection.findOne(query)
+
+    if (!result || result?.role !== 'admin')
+      return res.status(401).send({ message: 'unauthorized access!!' })
+
+    next()
+  }
+
+// verify creator
+
+const verifyCreator= async (req, res, next) => {
+
+    const user = req.decoded
+    const query = { email: user?.email }
+    const result = await userCollection.findOne(query)
+
+    if (!result || result?.role !== 'taskCreator')
+      return res.status(401).send({ message: 'unauthorized access!!' })
+
+    next()
+  }
+
+
+
+
+
+
+
     app.post('/jwt', async (req, res) => {
         const user = req.body;
         // console.log(email);
@@ -111,8 +150,14 @@ const query = {email: email};
 const result = await userCollection.findOne(query)
 res.send(result)
  })
-app.put('/userCoin',verifyToken, async(req, res)=>{
+app.put('/userCoin',verifyToken,verifyCreator, async(req, res)=>{
 
+
+    if(req.decoded.email !== req.body.userEmail){
+
+return res.status(403).send({message:"Forbidden access"})
+
+    }
 const email = req.decoded.email;
 const query = {email: email};
 const reqCoin = req.body.updatedCoin;
@@ -131,7 +176,7 @@ res.send(result)
 
 // taskRelated api
 //  verify creator
- app.post('/addTask',verifyToken, async (req, res)=>{
+ app.post('/addTask',verifyToken,verifyCreator, async (req, res)=>{
 
 console.log(req.body,"ji vai", req.decoded.email);
 
