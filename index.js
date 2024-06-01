@@ -46,6 +46,7 @@ async function run() {
 
 
 const userCollection = client.db('taskBite').collection('users')
+const taskCollection = client.db('taskBite').collection('task')
 
     app.post('/jwt', async (req, res) => {
         const user = req.body;
@@ -86,7 +87,7 @@ next()
 
     }
 
-
+// user
 
  app.post('/userAdd',async (req,res)=>{
 
@@ -110,6 +111,40 @@ const query = {email: email};
 const result = await userCollection.findOne(query)
 res.send(result)
  })
+
+
+ 
+
+// taskrelated api
+//  verify creator
+ app.post('/addTask',verifyToken, async (req, res)=>{
+
+console.log(req.body,"ji vai", req.decoded.email);
+
+if(!req.body.creator_email  === req.decoded.email){
+    return res.status(403).send({message: "forbidden access"})
+}
+
+
+const taskInfo = {
+
+    ...req.body,
+    creation_time : Date.now()
+
+}
+
+
+const result =await taskCollection.insertOne(taskInfo)
+res.send(result)
+
+
+
+
+
+ })
+
+
+
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
