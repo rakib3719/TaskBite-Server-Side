@@ -111,11 +111,25 @@ const query = {email: email};
 const result = await userCollection.findOne(query)
 res.send(result)
  })
+app.put('/userCoin',verifyToken, async(req, res)=>{
+
+const email = req.decoded.email;
+const query = {email: email};
+const reqCoin = req.body.updatedCoin;
+const updateCoin = {
+
+    $set: {
+        coin : reqCoin
+      },
+};
+const result = await userCollection.updateOne(query, updateCoin);
+res.send(result)
+
+})
 
 
- 
 
-// taskrelated api
+// taskRelated api
 //  verify creator
  app.post('/addTask',verifyToken, async (req, res)=>{
 
