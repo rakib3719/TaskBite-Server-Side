@@ -28,7 +28,7 @@ app.use
 
 
 
-const uri = `mongodb+srv://${process.env.USER}:${process.env.PASSWORD}@cluster0.ngsjczb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+  const uri = "mongodb+srv://test:4XsrmqTf7T9EJSCb@cluster0.lrp41gp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -42,7 +42,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
+    await client.connect();
     // Send a ping to confirm a successful connection
 
 
@@ -229,6 +229,16 @@ res.send(result)
     res.send(result)
   })
 
+  // worker task related api
+
+  app.get('/allTask', verifyToken, async(req, res)=>{
+
+    const result = await taskCollection.find().toArray();
+    res.send(result)
+
+
+  })
+
 
 // payment related api
 
@@ -240,6 +250,16 @@ const paymentInfo = req.body;
 const result = await paymentHistoryCollection.insertOne(paymentInfo);
 res.send(result)
 
+
+});
+
+
+app.get(`/paymentHistory/:email`, async (req, res)=>{
+
+const email = req.params.email;
+const query = {email: email};
+const result = await paymentHistoryCollection.find(query).toArray()
+res.send(result)
 
 })
 
