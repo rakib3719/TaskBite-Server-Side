@@ -28,7 +28,7 @@ app.use
 
 
 
-  const uri = "mongodb+srv://test:4XsrmqTf7T9EJSCb@cluster0.lrp41gp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+  const uri = `mongodb+srv://${process.env.USER}:${process.env.PASSWORD}@cluster0.ngsjczb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -50,6 +50,8 @@ const userCollection = client.db('taskBite').collection('users')
 const taskCollection = client.db('taskBite').collection('task')
 const paymentHistoryCollection = client.db('taskBite').collection('paymentHistory')
 
+const submissionCollection = client.db('taskBite').collection('submissionInfo')
+
 
 
 // verify
@@ -68,6 +70,37 @@ const verifyAdmin = async (req, res, next) => {
 
     next()
   }
+
+// verify worker
+
+const verifyWorker= async (req, res, next) => {
+
+  const user = req.decoded
+  const query = { email: user?.email }
+  const result = await userCollection.findOne(query)
+
+  if (!result || result?.role !== 'worker')
+    return res.status(401).send({ message: 'unauthorized access!!' })
+
+  next()
+}
+
+
+
+
+
+
+
+  app.post('/jwt', async (req, res) => {
+      const user = req.body;
+      // console.log(email);
+      const token = jwt.sign(user, process.env.TOKEN_SECRET, {
+        expiresIn: '365d',
+      })
+      res.send({token});
+
+  })
+
 
 // verify creator
 
@@ -174,6 +207,39 @@ res.send(result)
 
 })
 
+
+// worker api
+
+app.get('/taskDetails/:id',async (req, res)=>{
+
+const id = req.params.id;
+const query = {_id: new ObjectId(id)};
+const result = await taskCollection.findOne(query);
+res.send(result)
+
+})
+
+
+
+// submission related api
+
+app.post('/addSubmission',verifyToken,verifyWorker, async(req, res)=>{
+
+
+
+const submissionData = req.body;
+
+  if(submissionData.worker_email !== req.decoded.email){
+    return res.status(403).send({message: "forbidden access"})
+}
+
+const result = await submissionCollection.insertOne(submissionData)
+res.send(result)
+
+})
+
+
+// worker api
 
 
 // taskRelated api
