@@ -48,6 +48,7 @@ async function run() {
 
 const userCollection = client.db('taskBite').collection('users')
 const taskCollection = client.db('taskBite').collection('task')
+const paymentHistoryCollection = client.db('taskBite').collection('paymentHistory')
 
 
 
@@ -229,7 +230,22 @@ res.send(result)
   })
 
 
+// payment related api
+
+// payment history
+
+app.post('/paymentHistory',verifyToken, async(req, res)=>{
+
+const paymentInfo = req.body;
+const result = await paymentHistoryCollection.insertOne(paymentInfo);
+res.send(result)
+
+
+})
+
 // payment intent
+
+
 
 app.post("/create-payment-intent",async(req, res)=>{
 
