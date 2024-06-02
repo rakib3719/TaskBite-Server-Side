@@ -4,6 +4,7 @@ require('dotenv').config()
 const jwt = require("jsonwebtoken")
 const port = process.env.PORT || 5000;
 const app = express();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 app.use
@@ -228,7 +229,30 @@ res.send(result)
   })
 
 
+// payment intent
 
+app.post("/create-payment-intent",async(req, res)=>{
+
+  const {price} = req.body;
+  const amount = parseInt(price * 100);
+
+  const paymentIntent = await stripe.paymentIntents.create({
+
+
+    amount:amount,
+    currency: "usd",
+    payment_method_types: ['card']
+
+
+
+  })
+  res.send({
+
+    clientSecret: paymentIntent.client_secret
+
+  })
+
+})
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
