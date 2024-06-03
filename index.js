@@ -238,12 +238,53 @@ res.send(result)
 
 })
 
+// get submission
 
-// worker api
+app.get('/mySubmissionData/:email',verifyToken, verifyWorker, async(req, res)=>{
+const email = req.params.email;
+if(req.decoded.email !== email){
+  return res.status(403).send({message: "forbidden access"})
+}
+
+
+const query = { worker_email : email};
+const result = await submissionCollection.find(query).toArray();
+res.send(result)
+
+})
+
+
+// creator 
+
+
+app.get('/allPendingData/:email', verifyToken, verifyCreator, async(req, res)=>{
+
+const email = req.params.email;
+if(req.decoded.email !== email){
+  return res.status(403).send({message: "forbidden access"})
+}
+
+
+const query = {
+  status: "pending",
+  
+creator_email:email
+              
+}
+const result = await submissionCollection.find(query).toArray();
+res.send(result)
+
+
+})
+
+// creator 
+
+// worker api end
 
 
 // taskRelated api
 //  verify creator
+// creator api
  app.post('/addTask',verifyToken,verifyCreator, async (req, res)=>{
 
 console.log(req.body,"ji vai", req.decoded.email);
@@ -304,6 +345,8 @@ res.send(result)
 
 
   })
+
+
 
 
 // payment related api
