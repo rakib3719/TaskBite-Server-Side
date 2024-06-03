@@ -417,7 +417,41 @@ res.send(result)
 
   })
 
+app.get('/getTask/:id', verifyToken, verifyCreator, async(req,res)=>{
 
+const id = req.params.id;
+
+
+const query = {_id: new ObjectId(id)};
+const result = await taskCollection.findOne(query);
+res.send(result)
+
+})
+// update task
+
+app.put('/updateTask/:id', verifyToken, verifyCreator,async (req, res)=>{
+
+const id = req.params.id;
+const query ={_id: new ObjectId(id)}
+const updatedTaskInfo = req.body;
+console.log(  "this is update", updatedTaskInfo);
+const updatedTask = {
+
+  $set:{
+
+    
+title:updatedTaskInfo.title,
+
+task_Detail: updatedTaskInfo.task_Detail,
+
+submission_Details: updatedTaskInfo.submission_Details
+  },
+}
+
+const result = await taskCollection.updateOne(query, updatedTask);
+res.send(result)
+
+})
 
 
 // payment related api
