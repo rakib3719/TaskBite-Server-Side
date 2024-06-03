@@ -407,6 +407,8 @@ res.send(result)
 });
 
 
+
+
 app.get(`/paymentHistory/:email`, async (req, res)=>{
 
 const email = req.params.email;
@@ -415,6 +417,19 @@ const result = await paymentHistoryCollection.find(query).toArray()
 res.send(result)
 
 })
+
+app.get('/totalPayment/:email', async (req, res) => {
+  const email = req.params.email;
+  const query = { email: email };
+  
+
+  const payments = await paymentHistoryCollection.find(query).toArray();
+  
+
+  const paidAmounts = payments.map(payment => payment.paid_amount);
+
+  res.send(paidAmounts);
+});
 
 // payment intent
 
