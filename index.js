@@ -51,6 +51,7 @@ const taskCollection = client.db('taskBite').collection('task')
 const paymentHistoryCollection = client.db('taskBite').collection('paymentHistory')
 
 const submissionCollection = client.db('taskBite').collection('submissionInfo')
+const withDrawCollection = client.db('taskBite').collection('withDrawCollecton')
 
 
 
@@ -311,6 +312,18 @@ res.send({ count: result })
 
 })
 
+app.get('/approvedData/:email', verifyToken, verifyWorker, async(req, res)=>{
+  const email = req.params.email;
+  if(email!== req.decoded.email){
+    res.status(403).send({message: "Forbidden access"})
+  }
+  const query = {worker_email: email,
+    status: 'approved'
+  }
+  const result = await submissionCollection.find(query).toArray()
+  res.send(result)
+
+})
 
 // creator 
 
@@ -444,6 +457,25 @@ app.get('/totalPayment/:email',verifyToken,verifyCreator, async (req, res) => {
 
   res.send(paidAmounts);
 });
+
+
+
+// withDraw related api
+
+
+app.post('/withDraw', verifyToken,verifyWorker, async(req, res)=>{
+
+
+const withDrawInfo = req.body;
+if(req.decoded.email !== withDrawInfo.worker_email){
+
+  
+  res.status(403).send({message:"Forbidden access"})
+}
+const result = await withDrawCollection.insertOne(withDrawInfo);
+res.send(result)
+
+})
 
 // payment intent
 
