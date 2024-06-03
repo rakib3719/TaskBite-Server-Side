@@ -297,6 +297,20 @@ res.send(result)
 
 })
 
+app.get(`/totalSubmission/:email`, verifyToken, verifyWorker, async(req, res)=>{
+
+const email = req.params.email;
+if(email!== req.decoded.email){
+  res.status(403).send({message: "Forbidden access"})
+}
+const query = {worker_email: email}
+
+const result =await submissionCollection.countDocuments(query)
+res.send({ count: result })
+
+
+})
+
 
 // creator 
 
@@ -418,7 +432,7 @@ res.send(result)
 
 })
 
-app.get('/totalPayment/:email', async (req, res) => {
+app.get('/totalPayment/:email',verifyToken,verifyCreator, async (req, res) => {
   const email = req.params.email;
   const query = { email: email };
   
