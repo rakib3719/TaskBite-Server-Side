@@ -207,6 +207,50 @@ res.send(result)
 
 })
 
+app.put('/workerCoinUpdate', verifyToken, verifyCreator, async(req, res)=>{
+
+const workerInfo = req.body;
+const workerEmail = workerInfo.workerEmail;
+
+const query = {email: workerEmail};
+
+const findPrevCoin = await userCollection.findOne(query);
+const prevCoin = findPrevCoin.coin ;
+const updatedCoin = workerInfo.upCoin + prevCoin;
+
+const updateCoin = {
+  $set: {
+  coin: updatedCoin
+  },
+};
+
+const result =await userCollection.updateOne(query, updateCoin);
+res.send(result)
+
+
+
+
+})
+// update status
+
+app.put('/updateStatus/:id',verifyToken,verifyCreator, async(req, res)=>{
+
+  const id = req.params.id;
+  const status = req.body.status;
+const query = {_id: new ObjectId(id)};
+
+
+const updateStatus = {
+  $set: {
+   status:status
+  },
+};
+
+
+const result = await submissionCollection.updateOne(query, updateStatus)
+res.send(result)
+
+})
 
 // worker api
 
@@ -287,7 +331,7 @@ res.send(result)
 // creator api
  app.post('/addTask',verifyToken,verifyCreator, async (req, res)=>{
 
-console.log(req.body,"ji vai", req.decoded.email);
+
 
 if(!req.body.creator_email  === req.decoded.email){
     return res.status(403).send({message: "forbidden access"})
