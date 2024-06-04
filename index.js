@@ -511,6 +511,21 @@ res.send(result)
 
 })
 
+
+
+// admin related api
+app.get('/workerUser/:email', verifyToken, verifyAdmin, async(req, res)=>{
+
+  const email = req.params.email;
+
+  if(req.decoded.email !== email){
+    return res.status(403).send({massage:"forbidden access"})
+  }
+  const query = {role:'worker'};
+  const result = await userCollection.find(query).toArray();
+  res.send(result)
+} )
+
 // payment intent
 
 
