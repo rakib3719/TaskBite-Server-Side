@@ -526,6 +526,52 @@ app.get('/workerUser/:email', verifyToken, verifyAdmin, async(req, res)=>{
   res.send(result)
 } )
 
+app.get('/task/:email', verifyToken, verifyAdmin, async(req,res)=>{
+  const email = req.params.email;
+
+  if(req.decoded.email !== email){
+    return res.status(403).send({massage:"forbidden access"})
+  }
+
+  const result = await taskCollection.find().toArray();
+  res.send(result)
+
+
+} )
+
+app.delete('/taskDeleteAdmin/:id', verifyToken, verifyAdmin, async(req, res)=>{
+
+const id = req.params.id;
+const query = {_id :new ObjectId(id)};
+const result = await taskCollection.deleteOne(query);
+res.send(result)
+
+})
+
+// update user
+
+
+app.put('/updateUser', verifyToken, verifyAdmin,async(req, res)=>{
+
+const updatedInfo = req.body;
+const email = updatedInfo.email;
+const query = {email: email};
+const updatedRole = {
+
+
+  $set:{
+role: updatedInfo.role
+
+  }
+}
+
+const result = await userCollection.updateOne(query, updatedRole);
+res.send(result)
+
+})
+
+
+
 // payment intent
 
 
