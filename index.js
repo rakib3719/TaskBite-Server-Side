@@ -571,6 +571,27 @@ res.send(result)
 })
 
 
+app.get('/adminStatesInfo', verifyToken, verifyAdmin, async(req, res)=>{
+
+const totalUsers = await userCollection.countDocuments();
+
+const allUser = await userCollection.find().toArray();
+const totalCoin = allUser.map(user => user.coin);
+const payments = await paymentHistoryCollection.find().toArray();
+  
+
+const paidAmounts = payments.map(payment => payment.paid_amount);
+res.send({
+
+  totalUsers,
+  totalCoin,
+  paidAmounts
+})
+
+
+})
+
+
 
 // payment intent
 
