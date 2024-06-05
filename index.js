@@ -67,7 +67,7 @@ const verifyAdmin = async (req, res, next) => {
     const result = await userCollection.findOne(query)
 
     if (!result || result?.role !== 'admin')
-      return res.status(401).send({ message: 'unauthorized access!!' })
+      return res.status(403).send({ message: 'Forbidden access!!' })
 
     next()
   }
@@ -81,7 +81,7 @@ const verifyWorker= async (req, res, next) => {
   const result = await userCollection.findOne(query)
 
   if (!result || result?.role !== 'worker')
-    return res.status(401).send({ message: 'unauthorized access!!' })
+    return res.status(403).send({ message: 'Forbidden access!!' })
 
   next()
 }
@@ -112,7 +112,7 @@ const verifyCreator= async (req, res, next) => {
     const result = await userCollection.findOne(query)
 
     if (!result || result?.role !== 'taskCreator')
-      return res.status(401).send({ message: 'unauthorized access!!' })
+      return res.status(403).send({ message: 'Forbidden access!!' })
 
     next()
   }
@@ -139,7 +139,7 @@ console.log(req.headers.authorization);
 
 if(!req?.headers?.authorization){
 
-return res.status(401).send({message: 'forbidden access'})
+return res.status(401).send({message: 'Unauthorized access'})
 
 }
 
@@ -150,7 +150,7 @@ const token = req.headers.authorization.split(' ')[1];
 jwt.verify(token, process.env.TOKEN_SECRET,(err, decoded)=>{
 
 if(err){
-    return res.status(401).send({message: 'forbidden access'})
+    return res.status(400).send({message: 'Bad Request'})
 } 
 
 req.decoded = decoded;
@@ -526,6 +526,16 @@ app.get('/workerUser/:email', verifyToken, verifyAdmin, async(req, res)=>{
   res.send(result)
 } )
 
+
+app.delete('/deleteUser/:email', verifyToken, verifyAdmin, async(req,res)=>{
+console.log('hit');
+const email = req.params.email;
+const query = {email: email};
+
+const result = await userCollection.deleteOne(query);
+res.send(result)
+
+})
 app.get('/task/:email', verifyToken, verifyAdmin, async(req,res)=>{
   const email = req.params.email;
 
@@ -590,7 +600,48 @@ res.send({
 
 
 })
+// withdraw request
+app.get('/withdrawRequest', verifyToken, verifyAdmin, async(req, res)=>{
 
+const result = await withDrawCollection.find().toArray();
+res.send(result)
+
+
+})
+
+
+app.put('/updateCoin', verifyToken, verifyAdmin, async(req,res)=>{
+
+const coinData = req.body;
+console.log(coinData);
+
+const workerEmail = coinData.workerEmail;
+
+const query = {email: workerEmail};
+
+const minusCoin = parseInt(coinData.coin);
+console.log(minusCoin);
+
+const updatedCoin = {
+
+
+
+    $inc: {coin: - minusCoin }
+
+
+}
+
+const result = await  userCollection.updateOne(query, updatedCoin);
+res.send(result)
+
+})
+
+app.delete('/deleteWithdrawList/:id', verifyToken, verifyAdmin, async (req, res) => {
+  const id = req.params.id
+  const query = { _id: new ObjectId(id) }
+  const result = await withDrawCollection.deleteOne(query)
+  res.send(result)
+})
 
 
 // payment intent
