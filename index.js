@@ -52,6 +52,7 @@ const paymentHistoryCollection = client.db('taskBite').collection('paymentHistor
 
 const submissionCollection = client.db('taskBite').collection('submissionInfo')
 const withDrawCollection = client.db('taskBite').collection('withDrawCollecton')
+const notificationCollection = client.db('taskBite').collection('notificationInfo')
 
 
 
@@ -290,13 +291,20 @@ const email = req.params.email;
 if(req.decoded.email !== email){
   return res.status(403).send({message: "forbidden access"})
 }
+const page = parseInt(req.query.currentPage);
+const skip = parseInt(req.query.limit);
+
+
 
 
 const query = { worker_email : email};
-const result = await submissionCollection.find(query).toArray();
+const result = await submissionCollection.find(query).skip(page * skip).limit(skip).toArray();
 res.send(result)
 
 })
+
+
+
 
 app.get(`/totalSubmission/:email`, verifyToken, verifyWorker, async(req, res)=>{
 
@@ -528,7 +536,7 @@ app.get('/workerUser/:email', verifyToken, verifyAdmin, async(req, res)=>{
 
 
 app.delete('/deleteUser/:email', verifyToken, verifyAdmin, async(req,res)=>{
-console.log('hit');
+
 const email = req.params.email;
 const query = {email: email};
 
@@ -643,6 +651,48 @@ app.delete('/deleteWithdrawList/:id', verifyToken, verifyAdmin, async (req, res)
   res.send(result)
 })
 
+
+// home page 
+
+app.get('/topUser', async(req, res)=>{
+  const filter = {role: 'worker'}
+
+const result = await userCollection.find(filter).sort({coin:-1}).limit(6).toArray();
+res.send(result)
+
+})
+
+app.get('/complition/:email', async(req, res)=>{
+  const email = req.params.email;
+  const query = {
+    email:email,
+    status:"approved"
+   
+  };
+  const result = await submissionCollection.countDocuments(query);
+  res.send({count:result})
+})
+
+
+// notification
+
+app.post('/notification', verifyToken,  async(req, res)=>{
+
+  const notificationDetals = req.body;
+  const result = await notificationCollection.insertOne(notificationDetals);
+  res.send(result)
+  
+  })
+
+  app.get('/notification/:email',verifyToken, async(req, res)=>{
+
+const email = req.params.email;
+
+const query = {toEmail: email}
+const result = await notificationCollection.find(query).toArray();
+res.send(result);
+
+  })
 
 // payment intent
 
